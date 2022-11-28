@@ -1,0 +1,12 @@
+USE WareHouseManagementSystem;
+
+CREATE TABLE BankBranch(
+    BranchCode INT NOT NULL PRIMARY KEY,
+    BranchName VARCHAR(20) NOT NULL,
+	PhoneNumber CHAR(10) NOT NULL CHECK (PhoneNumber like '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
+    Email VARCHAR(50) NOT NULL,
+    [Address] VARCHAR(50) NOT NULL,
+    City VARCHAR(10) NOT NULL,
+    [State] VARCHAR(15) NOT NULL,
+	ZipCode CHAR(5) NOT NULL CHECK (ZipCode like '[0-9][0-9][0-9][0-9][0-9]')
+);
