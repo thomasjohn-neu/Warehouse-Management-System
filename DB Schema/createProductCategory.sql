@@ -2,6 +2,7 @@ USE WareHouseManagementSystem;
 
 CREATE TABLE ProductCategory(
     categoryId INT NOT NULL,
-    title VARCHAR(20) NOT NULL,
-    FOREIGN KEY(categoryId, title) REFERENCES Category (categoryId, title),
+    productId INT NOT NULL,
+    FOREIGN KEY(categoryId) REFERENCES Category (categoryId),
+    FOREIGN KEY(productId) REFERENCES Product (productId),
 );
