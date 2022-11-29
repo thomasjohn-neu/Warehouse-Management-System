@@ -6,5 +6,5 @@ CREATE TABLE Category(
     metaTitle VARCHAR(30) NOT NULL,
     slug VARCHAR(100) NOT NULL,
     content TEXT NULL DEFAULT NULL,
-    PRIMARY KEY (categoryId, title)
+    PRIMARY KEY (categoryId)
 );
