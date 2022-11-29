@@ -1,0 +1,9 @@
+CREATE TABLE Address(
+    addressID INT NOT NULL PRIMARY KEY,
+	orderID INT NOT NULL FOREIGN KEY REFERENCES Order(orderID),
+    [address] VARCHAR(MAX) NOT NULL,
+    city VARCHAR(20) NOT NULL,
+	[state] VARCHAR(15) NOT NULL,
+	zipCode CHAR(5) NOT NULL,
+	[country] VARCHAR(15) NOT NULL,
+);
