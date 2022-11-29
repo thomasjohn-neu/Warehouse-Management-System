@@ -12,6 +12,6 @@ INSERT INTO Product(productId, title, summary, productType, content) VALUES (9, 
 INSERT INTO Product(productId, title, summary, productType, content) VALUES (10, 'Bose Speakers', 'Black, 2.1 channel', 0, 'Black, 2.1 channel, Bluetooth 5.0');
 INSERT INTO Product(productId, title, summary, productType, content) VALUES (11, 'Bose Speakers Pro', 'Black, 2.1 channel', 0, 'Black, 2.1 channel, Bluetooth 5.0');
 INSERT INTO Product(productId, title, summary, productType, content) VALUES (12, 'Chromebook', 'Black 128GB', 0, 'Black, 2.1 channel, Bluetooth 5.0');
-INSERT INTO Product(productId, title, summary, productType, content) VALUES (13, 'HP Keyboard', 'Black, all keys', 0, 'Black, sleek, Bluetooth 5.0');
+INSERT INTO Product(productId, title, summary, productType, content) VALUES (13, 'HP Keyboard', 'Black, all keys', 0, 'Black, sleek black, Bluetooth 5.0');
 
 
