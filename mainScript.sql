@@ -19,8 +19,8 @@ CREATE TABLE Supplier
      line2 VARCHAR(20),
      city VARCHAR(20),
      state VARCHAR(20),
-     zipcode INT,
-     phone INT,
+     zipcode VARCHAR(20),
+     phone VARCHAR(20),
      email VARCHAR(50)
      );
 
@@ -33,14 +33,14 @@ CREATE TABLE Category(
     PRIMARY KEY (categoryId)
 );
 
-CREATE TABLE User(
+CREATE TABLE [User](
     userId INT NOT NULL,
     firstName VARCHAR(20) NOT NULL,
 	middleName VARCHAR(20),
     lastName VARCHAR(20),
 	username VARCHAR(20),
     email VARCHAR(50),
-	phoneNumber INT NOT NULL,
+	phoneNumber VARCHAR(20) NOT NULL,
 	registeredAt DATETIME NOT NULL,
 	lastLogin DATETIME NOT NULL,
     PRIMARY KEY(userID)
@@ -50,7 +50,6 @@ CREATE TABLE Product(
     productId INT NOT NULL,
     title VARCHAR(50) NOT NULL,
     summary TEXT NULL DEFAULT NULL,
-    productType INT NOT NULL DEFAULT 0,
     content TEXT NULL DEFAULT NULL,
     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
@@ -91,12 +90,29 @@ CREATE TABLE StockItem
 	  updatedAt DATETIME
 	  );
 
+create TABLE [Transaction](
+	transactionId INT NOT NULL,
+	paymentType VARCHAR(25) CHECK([paymentType] IN ('Credit_Card','Debit_Card','Net_Banking')) DEFAULT 'Credit Card',
+	charges FLOAT,
+	code INT,
+	mode VARCHAR(20),
+	[status] INT NOT NULL DEFAULT 0,
+	createdAt DATETIME NOT NULL,
+    updatedAt DATETIME NULL DEFAULT NULL,
+	content VARCHAR(MAX),
+	PRIMARY KEY(transactionId)
+);
+
+
+
+
 CREATE TABLE [Order]
     (
       orderId INT NOT NULL PRIMARY KEY,
-      userId INT NOT NULL FOREIGN KEY REFERENCES Users(userId),
+      userId INT NOT NULL FOREIGN KEY REFERENCES [User](userId),
       itemId INT NOT NULL FOREIGN KEY REFERENCES StockItem(itemId),
       supplierId INT NOT NULL FOREIGN KEY REFERENCES Supplier(supplierId),
+	  transactionId INT NOT NULL FOREIGN KEY REFERENCES [Transaction](transactionId),
       orderType VARCHAR(25) CHECK([orderType] IN ('purchase order','customer order')) DEFAULT 'customer order',
       [status] VARCHAR(40),
       price DECIMAL,
@@ -110,7 +126,6 @@ CREATE TABLE [Order]
       createdAt DATETIME,
       updatedAt DATETIME
       );
-
 
 
 CREATE TABLE OrderItem
@@ -130,44 +145,27 @@ CREATE TABLE OrderItem
 	);
 
 
-
 CREATE TABLE[Address](
     addressId INT NOT NULL,
-	orderId INT NOT NULL,
+	userId INT NOT NULL,
    [address] VARCHAR(MAX) NOT NULL,
     city VARCHAR(20) NOT NULL,
    [state] VARCHAR(15) NOT NULL,
-	zipCode INT NOT NULL,
+	zipCode VARCHAR(20) NOT NULL,
    [country] VARCHAR(15) NOT NULL,
     createdAt DATETIME NOT NULL,
-	FOREIGN KEY(orderId) REFERENCES [Order](orderId),
+	FOREIGN KEY(userId) REFERENCES [user](userId),
 	PRIMARY KEY(addressId)
-);
-
-
-
-create TABLE [Transaction](
-	transactionId INT NOT NULL,
-	orderId INT NOT NULL,
-	paymentType VARCHAR(25) CHECK([paymentType] IN ('Credit Card','Debit Card','Net Banking')) DEFAULT 'Credit Card',
-	charges FLOAT,
-	code INT,
-	mode VARCHAR(20),
-	[status] INT NOT NULL DEFAULT 0,
-	createdAt DATETIME NOT NULL,
-    updatedAt DATETIME NULL DEFAULT NULL,
-	content VARCHAR(MAX),
-	FOREIGN KEY(orderId) REFERENCES [Order](orderId),
-	PRIMARY KEY(transactionId)
 );
 
 
 create TABLE Delivery(
 	deliveryId INT NOT NULL,
-	orderId INT NOT NULL,
+	orderId INT NOT NULL UNIQUE,
 	addressId INT NOT NULL,
 	[status] INT NOT NULL DEFAULT 0,
 	FOREIGN KEY(orderId) REFERENCES [Order](orderId),
 	FOREIGN KEY(addressId) REFERENCES [Address](addressId),
 	PRIMARY KEY(deliveryId)
 );
+
