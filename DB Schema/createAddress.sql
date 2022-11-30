@@ -7,6 +7,6 @@ CREATE TABLE[Address](
 	zipCode CHAR(5) NOT NULL,
    [country] VARCHAR(15) NOT NULL,
     createdAt DATETIME NOT NULL,
-	FOREIGN KEY(orderID) REFERENCES [WareHouseManagementSystem].[dbo].[Order](orderId)
+	FOREIGN KEY(orderID) REFERENCES [WareHouseManagementSystem].[dbo].[Order](orderId),
 	PRIMARY KEY(addressID)
 );
