@@ -5,7 +5,7 @@ CREATE TABLE TransactionType(
 
 create TABLE "Transaction"(
 	transactionID INT NOT NULL PRIMARY KEY,
-	orderID INT NOT NULL FOREIGN KEY REFERENCES Order(orderID),
+	orderID INT NOT NULL FOREIGN KEY REFERENCES [WareHouseManagementSystem].[dbo].[Order](orderID),
 	transactionTypeID INT FOREIGN KEY REFERENCES TransactionType(transactionTypeID),
 	charges FLOAT,
 	code INT,
