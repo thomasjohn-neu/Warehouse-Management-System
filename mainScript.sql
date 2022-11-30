@@ -33,7 +33,7 @@ CREATE TABLE Category(
     PRIMARY KEY (categoryId)
 );
 
-CREATE TABLE Users(
+CREATE TABLE User(
     userId INT NOT NULL,
     firstName VARCHAR(20) NOT NULL,
 	middleName VARCHAR(20),
@@ -149,7 +149,7 @@ CREATE TABLE[Address](
 create TABLE [Transaction](
 	transactionId INT NOT NULL,
 	orderId INT NOT NULL,
-	paymentType VARCHAR(25) CHECK([paymentType] IN ('Credit_Card','Debit_Card','Net_Banking')) DEFAULT 'Credit Card',
+	paymentType VARCHAR(25) CHECK([paymentType] IN ('Credit Card','Debit Card','Net Banking')) DEFAULT 'Credit Card',
 	charges FLOAT,
 	code INT,
 	mode VARCHAR(20),
