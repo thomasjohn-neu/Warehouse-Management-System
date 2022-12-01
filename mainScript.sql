@@ -80,6 +80,7 @@ CREATE TABLE StockItem
       productId INT NOT NULL FOREIGN KEY REFERENCES Product(productId),
       brandId INT NOT NULL FOREIGN KEY REFERENCES brand(brandID),
       supplierId INT NOT NULL FOREIGN KEY REFERENCES Supplier(supplierID),
+      orderId INT NOT NULL FOREIGN KEY REFERENCES Order(orderId),
       sku VARCHAR(40),
       discount DECIMAL,
       price DECIMAL,
@@ -109,10 +110,8 @@ CREATE TABLE [Transaction](
 CREATE TABLE [Order]
     (
       orderId INT NOT NULL PRIMARY KEY,
-      userId INT NOT NULL FOREIGN KEY REFERENCES [User](userId),
-      itemId INT NOT NULL FOREIGN KEY REFERENCES StockItem(itemId),
-      supplierId INT NOT NULL FOREIGN KEY REFERENCES Supplier(supplierId),
-	  transactionId INT NOT NULL FOREIGN KEY REFERENCES [Transaction](transactionId),
+      userId INT FOREIGN KEY REFERENCES [User](userId),
+      supplierId INT FOREIGN KEY REFERENCES Supplier(supplierId),
       orderType VARCHAR(25) CHECK([orderType] IN ('purchase order','customer order')) DEFAULT 'customer order',
       [status] VARCHAR(40),
       price DECIMAL,
