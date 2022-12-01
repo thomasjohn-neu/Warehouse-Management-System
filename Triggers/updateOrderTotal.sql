@@ -17,8 +17,6 @@ BEGIN
     Select 
 	@orderID = orderId
     FROM inserted;
-            SELECT @orderID ;
             SELECT @orderTotal = dbo.computeOrderTotalPrice(@orderID);
-            SELECT @orderTotal;
             UPDATE [Order] SET total = @orderTotal WHERE orderId = @orderID;
 END
