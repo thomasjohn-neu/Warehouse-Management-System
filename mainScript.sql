@@ -84,8 +84,8 @@ CREATE TABLE [Order]
       [status] VARCHAR(40),
       price DECIMAL,
       discount DECIMAL,
-      tax DECIMAL,
-      shippingCost DECIMAL,
+      tax DECIMAL DEFAULT 3,
+      shippingCost DECIMAL 0.5,
       total DECIMAL,
       promo DECIMAL,
       grandTotal DECIMAL,
@@ -117,7 +117,7 @@ CREATE TABLE StockItem
       supplierId INT NOT NULL FOREIGN KEY REFERENCES Supplier(supplierID),
       orderId INT NOT NULL FOREIGN KEY REFERENCES [Order](orderId),
       sku VARCHAR(40),
-      discount DECIMAL,
+      discount DECIMAL DEFAULT 0,
       price DECIMAL,
 	  quantity INT,
 	  [availability] CHAR,
@@ -342,22 +342,3 @@ VALUES
 (8, 8, 8, 0),
 (9, 9, 9, 1),
 (10, 10, 10, 1);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
