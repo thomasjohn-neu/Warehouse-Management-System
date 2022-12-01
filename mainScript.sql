@@ -262,20 +262,20 @@ INSERT INTO ProductMeta(metaId, productId, [key], content) VALUES (12, 12, 'bann
 INSERT INTO ProductMeta(metaId, productId, [key], content) VALUES (13, 13, 'banner', 'Feel the feather at your fingertips');
 
 
-INSERT INTO StockItem(itemId, productId, brandId, supplierId, sku, discount, price, quantity, [availability], defective, createdBy, updatedBy, createdAt, updatedAt) VALUES
-(1, 1, 1, 1, 'APPIPH14PRO64B', 0, 999.99, 1024, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(2, 2, 1, 1, 'APPIPH14PMX64B', 0, 1199.99, 1024, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(3, 3, 1, 1, 'APPIPH13PRO64B', 0, 1099.99, 1001, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(4, 4, 1, 1, 'APPIPH14BSC64B', 0, 1199.99, 1024, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(5, 5, 1, 1, 'APPIPH14+BS64B', 0, 899.99, 123, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(6, 6, 1, 1, 'APPAIRPODWHT3', 0, 199.99, 1, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(7, 7, 1, 1, 'APPAIRPODPRO3', 0, 299.99, 35, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(8, 8, 1, 1, 'APPAIRPODMAX3', 0, 499.99, 24, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(9, 9, 1, 1, 'BOSMASTRJACK1', 0, 299.99, 123, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(10, 10, 1, 1, 'BOSMASTRSPKR', 0, 359.99, 78, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(11, 11, 1, 1, 'BOSMTRSPKRPR', 0, 399.99, 98, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(12, 12, 1, 1, 'CHRMEBOOK122', 0, 899.99, 11, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(13, 13, 1, 1, 'HPKEYBRD1101', 0, 19.99, 11, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO StockItem(itemId, productId, brandId, supplierId, orderId, sku, discount, price, quantity, [availability], defective, createdBy, updatedBy, createdAt, updatedAt) VALUES
+(1, 1, 1, 1, 1, 'APPIPH14PRO64B', 0, 999.99, 1024, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 2, 1, 1, 2, 'APPIPH14PMX64B', 0, 1199.99, 1024, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, 3, 1, 1, 3, 'APPIPH13PRO64B', 0, 1099.99, 1001, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 4, 1, 1, 4, 'APPIPH14BSC64B', 0, 1199.99, 1024, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(5, 5, 1, 1, 5, 'APPIPH14+BS64B', 0, 899.99, 123, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(6, 6, 1, 1, 6, 'APPAIRPODWHT3', 0, 199.99, 1, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(7, 7, 1, 1, 7, 'APPAIRPODPRO3', 0, 299.99, 35, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(8, 8, 1, 1, 8, 'APPAIRPODMAX3', 0, 499.99, 24, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(9, 9, 1, 1, 9, 'BOSMASTRJACK1', 0, 299.99, 123, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(10, 10, 1, 1, 10, 'BOSMASTRSPKR', 0, 359.99, 78, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(11, 11, 1, 1, 11, 'BOSMTRSPKRPR', 0, 399.99, 98, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(12, 12, 1, 1, 12, 'CHRMEBOOK122', 0, 899.99, 11, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(13, 13, 1, 1, 13, 'HPKEYBRD1101', 0, 19.99, 11, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO [Transaction](transactionId, paymentType, code, mode, [status], createdAt, updatedAt, content, charges) VALUES
 (1, 'Credit_Card', 1122, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 1234.00),
@@ -290,18 +290,18 @@ INSERT INTO [Transaction](transactionId, paymentType, code, mode, [status], crea
 (10, 'Credit_Card', 1121, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 934.00);
 
 
-INSERT INTO [Order](orderId,userId,itemId,supplierId,transactionId,orderType,[status],price,tax,shippingCost,promo,createdAt,updatedAt)
+INSERT INTO [Order](orderId,userId,supplierId,orderType,[status],price,tax,shippingCost,promo,createdAt,updatedAt)
 VALUES
-(1,1,1,1,1,'purchase order','processed',200.00,21.00,1.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(2,2,2,2,2,'purchase order','processed',210.00,21.00,1.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(3,3,3,3,3,'purchase order','processed',220.00,11.00,4.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(4,4,4,4,4,'purchase order','processed',250.00,71.00,3.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(5,5,5,5,5,'customer order','processed',290.00,41.00,2.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(6,6,6,6,6,'purchase order','failed',240.00,21.00,5.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(7,7,7,7,7,'customer order','processed',270.00,24.00,5.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(8,8,8,8,8,'purchase order','processed',295.00,22.00,2.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(9,9,9,9,9,'customer order','failer',204.00,26.00,7.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(10,10,10,10,10,'purchase order','processed',208.00,25.00,2.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP);
+(1,1,1,'purchase order','processed',200.00,21.00,1.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(2,2,2,'purchase order','processed',210.00,21.00,1.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(3,3,3,'purchase order','processed',220.00,11.00,4.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(4,4,4,'purchase order','processed',250.00,71.00,3.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(5,5,5,'customer order','processed',290.00,41.00,2.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(6,6,6,'purchase order','failed',240.00,21.00,5.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(7,7,7,'customer order','processed',270.00,24.00,5.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(8,8,8,'purchase order','processed',295.00,22.00,2.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(9,9,9,'customer order','failer',204.00,26.00,7.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(10,10,10,'purchase order','processed',208.00,25.00,2.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP);
 
 
 INSERT INTO orderItem(orderItemId,productid,orderId,quantity,createdAt,updateAt,content)
