@@ -74,39 +74,6 @@ CREATE TABLE ProductMeta(
     PRIMARY KEY (metaId)
 );
 
-CREATE TABLE StockItem
-    (
-      itemId INT NOT NULL PRIMARY KEY,
-      productId INT NOT NULL FOREIGN KEY REFERENCES Product(productId),
-      brandId INT NOT NULL FOREIGN KEY REFERENCES brand(brandID),
-      supplierId INT NOT NULL FOREIGN KEY REFERENCES Supplier(supplierID),
-      orderId INT NOT NULL FOREIGN KEY REFERENCES Order(orderId),
-      sku VARCHAR(40),
-      discount DECIMAL,
-      price DECIMAL,
-	  quantity INT,
-	  [availability] CHAR,
-	  defective CHAR,
-	  createdBy INT,
-	  updatedBy INT,
-	  createdAt DATETIME,
-	  updatedAt DATETIME
-	  );
-
-
-CREATE TABLE [Transaction](
-	transactionId INT NOT NULL,
-	userId INT NOT NULL FOREIGN KEY REFERENCES [User](userId),
-	paymentType VARCHAR(25) CHECK([paymentType] IN ('Credit_Card','Debit_Card','Net_Banking')) DEFAULT 'Credit Card',
-	charges FLOAT,
-	code INT,
-	mode VARCHAR(20),
-	[status] INT NOT NULL DEFAULT 0,
-	createdAt DATETIME NOT NULL,
-    updatedAt DATETIME NULL DEFAULT NULL,
-	content VARCHAR(MAX),
-	PRIMARY KEY(transactionId)
-);
 
 CREATE TABLE [Order]
     (
@@ -125,6 +92,41 @@ CREATE TABLE [Order]
       createdAt DATETIME,
       updatedAt DATETIME
       );
+
+
+CREATE TABLE [Transaction](
+	transactionId INT NOT NULL,
+	userId INT NOT NULL FOREIGN KEY REFERENCES [User](userId),
+    orderId INT NOT NULL FOREIGN KEY REFERENCES [Order](orderId),
+	paymentType VARCHAR(25) CHECK([paymentType] IN ('Credit_Card','Debit_Card','Net_Banking')) DEFAULT 'Credit Card',
+	charges FLOAT,
+	code INT,
+	mode VARCHAR(20),
+	[status] INT NOT NULL DEFAULT 0,
+	createdAt DATETIME NOT NULL,
+    updatedAt DATETIME NULL DEFAULT NULL,
+	content VARCHAR(MAX),
+	PRIMARY KEY(transactionId)
+);
+
+CREATE TABLE StockItem
+    (
+      itemId INT NOT NULL PRIMARY KEY,
+      productId INT NOT NULL FOREIGN KEY REFERENCES Product(productId),
+      brandId INT NOT NULL FOREIGN KEY REFERENCES brand(brandID),
+      supplierId INT NOT NULL FOREIGN KEY REFERENCES Supplier(supplierID),
+      orderId INT NOT NULL FOREIGN KEY REFERENCES [Order](orderId),
+      sku VARCHAR(40),
+      discount DECIMAL,
+      price DECIMAL,
+	  quantity INT,
+	  [availability] CHAR,
+	  defective CHAR,
+	  createdBy INT,
+	  updatedBy INT,
+	  createdAt DATETIME,
+	  updatedAt DATETIME
+	  );
 
 
 CREATE TABLE OrderItem
@@ -165,6 +167,7 @@ create TABLE Delivery(
 	FOREIGN KEY(addressId) REFERENCES [Address](addressId),
 	PRIMARY KEY(deliveryId)
 );
+
 
 INSERT INTO Brand(brandId, title, summary, createdAt, updatedAt, about) VALUES (1, 'Apple', 'Phones,Personal gadgets', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,'Apple is an american multinational company specialising in personal electronics products');
 INSERT INTO Brand(brandId, title, summary, createdAt, updatedAt, about) VALUES (2, 'Bose', 'Speakers,Earphones,Headsets', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,'Bose is an american multinational company specialising in speakers, headphones,etc.');
@@ -262,34 +265,6 @@ INSERT INTO ProductMeta(metaId, productId, [key], content) VALUES (11, 11, 'bann
 INSERT INTO ProductMeta(metaId, productId, [key], content) VALUES (12, 12, 'banner', 'Slim like a sword');
 INSERT INTO ProductMeta(metaId, productId, [key], content) VALUES (13, 13, 'banner', 'Feel the feather at your fingertips');
 
-
-INSERT INTO StockItem(itemId, productId, brandId, supplierId, orderId, sku, discount, price, quantity, [availability], defective, createdBy, updatedBy, createdAt, updatedAt) VALUES
-(1, 1, 1, 1, 1, 'APPIPH14PRO64B', 0, 999.99, 1024, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(2, 2, 1, 1, 2, 'APPIPH14PMX64B', 0, 1199.99, 1024, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(3, 3, 1, 1, 3, 'APPIPH13PRO64B', 0, 1099.99, 1001, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(4, 4, 1, 1, 4, 'APPIPH14BSC64B', 0, 1199.99, 1024, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(5, 5, 1, 1, 5, 'APPIPH14+BS64B', 0, 899.99, 123, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(6, 6, 1, 1, 6, 'APPAIRPODWHT3', 0, 199.99, 1, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(7, 7, 1, 1, 7, 'APPAIRPODPRO3', 0, 299.99, 35, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(8, 8, 1, 1, 8, 'APPAIRPODMAX3', 0, 499.99, 24, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(9, 9, 1, 1, 9, 'BOSMASTRJACK1', 0, 299.99, 123, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(10, 10, 1, 1, 10, 'BOSMASTRSPKR', 0, 359.99, 78, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(11, 11, 1, 1, 11, 'BOSMTRSPKRPR', 0, 399.99, 98, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(12, 12, 1, 1, 12, 'CHRMEBOOK122', 0, 899.99, 11, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(13, 13, 1, 1, 13, 'HPKEYBRD1101', 0, 19.99, 11, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-INSERT INTO [Transaction](transactionId,userId, paymentType, code, mode, [status], createdAt, updatedAt, content, charges) VALUES
-(1,1, 'Credit_Card', 1122, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 1234.00),
-(2,2, 'Debit_Card', 1123, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 234.00),
-(3,3, 'Credit_Card', 1124, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 346.00),
-(4,4, 'Net_Banking', 1125, 'COD', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Not Received', 364.00),
-(5,5, 'Credit_Card', 1126, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 5234.00),
-(6,6, 'Debit_Card', 1127, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 7234.00),
-(7,7, 'Credit_Card', 1182, 'COD', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Not Received', 8234.00),
-(8,8, 'Net_Banking', 1192, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 134.00),
-(9,9, 'Debit_Card', 1120, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 34.00),
-(10,10, 'Credit_Card', 1121, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 934.00);
-
 INSERT INTO [Order](orderId,userId,supplierId,orderType,[status],price,tax,shippingCost,promo,createdAt,updatedAt)
 VALUES
 (1,1,1,'purchase order','processed',200.00,21.00,1.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
@@ -303,6 +278,30 @@ VALUES
 (9,9,9,'customer order','failer',204.00,26.00,7.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
 (10,10,10,'purchase order','processed',208.00,25.00,2.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP);
 
+
+INSERT INTO StockItem(itemId, productId, brandId, supplierId, orderId, sku, discount, price, quantity, [availability], defective, createdBy, updatedBy, createdAt, updatedAt) VALUES
+(1, 1, 1, 1, 1, 'APPIPH14PRO64B', 0, 999.99, 1024, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 2, 1, 1, 2, 'APPIPH14PMX64B', 0, 1199.99, 1024, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, 3, 1, 1, 3, 'APPIPH13PRO64B', 0, 1099.99, 1001, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 4, 1, 1, 4, 'APPIPH14BSC64B', 0, 1199.99, 1024, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(5, 5, 1, 1, 5, 'APPIPH14+BS64B', 0, 899.99, 123, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(6, 6, 1, 1, 6, 'APPAIRPODWHT3', 0, 199.99, 1, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(7, 7, 1, 1, 7, 'APPAIRPODPRO3', 0, 299.99, 35, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(8, 8, 1, 1, 8, 'APPAIRPODMAX3', 0, 499.99, 24, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(9, 9, 1, 1, 9, 'BOSMASTRJACK1', 0, 299.99, 123, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(10, 10, 1, 1, 10, 'BOSMASTRSPKR', 0, 359.99, 78, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO [Transaction](transactionId,userId, orderId, paymentType, code, mode, [status], createdAt, updatedAt, content, charges) VALUES
+(1,1,1,'Credit_Card', 1122, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 1234.00),
+(2,2,2, 'Debit_Card', 1123, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 234.00),
+(3,3,3, 'Credit_Card', 1124, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 346.00),
+(4,4,4, 'Net_Banking', 1125, 'COD', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Not Received', 364.00),
+(5,5,5, 'Credit_Card', 1126, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 5234.00),
+(6,6,6, 'Debit_Card', 1127, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 7234.00),
+(7,7,7, 'Credit_Card', 1182, 'COD', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Not Received', 8234.00),
+(8,8,8, 'Net_Banking', 1192, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 134.00),
+(9,9,9, 'Debit_Card', 1120, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 34.00),
+(10,10,10, 'Credit_Card', 1121, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 934.00);
 
 INSERT INTO orderItem(orderItemId,productid,orderId,quantity,createdAt,updateAt,content)
 VALUES
@@ -343,6 +342,16 @@ VALUES
 (8, 8, 8, 0),
 (9, 9, 9, 1),
 (10, 10, 10, 1);
+
+
+
+
+
+
+
+
+
+
 
 
 
