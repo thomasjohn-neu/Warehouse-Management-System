@@ -96,6 +96,7 @@ CREATE TABLE StockItem
 
 CREATE TABLE [Transaction](
 	transactionId INT NOT NULL,
+	userId INT NOT NULL FOREIGN KEY REFERENCES [User](userId),
 	paymentType VARCHAR(25) CHECK([paymentType] IN ('Credit_Card','Debit_Card','Net_Banking')) DEFAULT 'Credit Card',
 	charges FLOAT,
 	code INT,
@@ -129,7 +130,7 @@ CREATE TABLE [Order]
 CREATE TABLE OrderItem
     (
     orderItemId INT NOT NULL PRIMARY KEY,
-    productId INT NOT NULL,
+    productId INT NOT NULL FOREIGN KEY REFERENCES Product(productId),
     orderId INT NOT NULL FOREIGN KEY REFERENCES [Order](orderId),
     price DECIMAL,
     discount DECIMAL,
@@ -277,18 +278,17 @@ INSERT INTO StockItem(itemId, productId, brandId, supplierId, orderId, sku, disc
 (12, 12, 1, 1, 12, 'CHRMEBOOK122', 0, 899.99, 11, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (13, 13, 1, 1, 13, 'HPKEYBRD1101', 0, 19.99, 11, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-INSERT INTO [Transaction](transactionId, paymentType, code, mode, [status], createdAt, updatedAt, content, charges) VALUES
-(1, 'Credit_Card', 1122, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 1234.00),
-(2, 'Debit_Card', 1123, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 234.00),
-(3, 'Credit_Card', 1124, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 346.00),
-(4, 'Net_Banking', 1125, 'COD', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Not Received', 364.00),
-(5, 'Credit_Card', 1126, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 5234.00),
-(6, 'Debit_Card', 1127, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 7234.00),
-(7, 'Credit_Card', 1182, 'COD', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Not Received', 8234.00),
-(8, 'Net_Banking', 1192, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 134.00),
-(9, 'Debit_Card', 1120, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 34.00),
-(10, 'Credit_Card', 1121, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 934.00);
-
+INSERT INTO [Transaction](transactionId,userId, paymentType, code, mode, [status], createdAt, updatedAt, content, charges) VALUES
+(1,1, 'Credit_Card', 1122, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 1234.00),
+(2,2, 'Debit_Card', 1123, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 234.00),
+(3,3, 'Credit_Card', 1124, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 346.00),
+(4,4, 'Net_Banking', 1125, 'COD', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Not Received', 364.00),
+(5,5, 'Credit_Card', 1126, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 5234.00),
+(6,6, 'Debit_Card', 1127, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 7234.00),
+(7,7, 'Credit_Card', 1182, 'COD', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Not Received', 8234.00),
+(8,8, 'Net_Banking', 1192, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 134.00),
+(9,9, 'Debit_Card', 1120, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 34.00),
+(10,10, 'Credit_Card', 1121, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 934.00);
 
 INSERT INTO [Order](orderId,userId,supplierId,orderType,[status],price,tax,shippingCost,promo,createdAt,updatedAt)
 VALUES
