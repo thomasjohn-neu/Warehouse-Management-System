@@ -7,8 +7,8 @@ CREATE TABLE Brand
       brandId INT NOT NULL PRIMARY KEY,
       title VARCHAR(20),
       summary TEXT,
-      createdAt DATETIME,
-      updatedAt DATETIME,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       about TEXT
       );
 
@@ -43,8 +43,8 @@ CREATE TABLE [User](
 	username VARCHAR(20),
     email VARCHAR(50),
 	phoneNumber VARCHAR(20) NOT NULL,
-	registeredAt DATETIME NOT NULL,
-	lastLogin DATETIME NOT NULL,
+	registeredAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	lastLogin DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY(userID)
 );
 
@@ -88,8 +88,8 @@ CREATE TABLE [Order]
       total DECIMAL,
       promo DECIMAL,
       grandTotal DECIMAL,
-      createdAt DATETIME,
-      updatedAt DATETIME
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
       );
 
 
@@ -102,8 +102,8 @@ CREATE TABLE [Transaction](
 	code INT,
 	mode VARCHAR(20),
 	[status] INT NOT NULL DEFAULT 0,
-	createdAt DATETIME NOT NULL,
-    updatedAt DATETIME NULL DEFAULT NULL,
+	createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
 	content VARCHAR(MAX),
 	PRIMARY KEY(transactionId)
 );
@@ -123,8 +123,8 @@ CREATE TABLE StockItem
 	  defective CHAR,
 	  createdBy INT,
 	  updatedBy INT,
-	  createdAt DATETIME,
-	  updatedAt DATETIME
+	  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+	  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 	  );
 
 
@@ -136,8 +136,8 @@ CREATE TABLE OrderItem
     price DECIMAL,
     discount DECIMAL,
     quantity INT,
-    createdAt DATETIME,
-    updateAt DATETIME,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updateAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     content TEXT,
 	FOREIGN KEY (orderItemId) REFERENCES StockItem(itemId)
 	);
@@ -151,7 +151,7 @@ CREATE TABLE[Address](
    [state] VARCHAR(15) NOT NULL,
 	zipCode VARCHAR(20) NOT NULL,
    [country] VARCHAR(15) NOT NULL,
-    createdAt DATETIME NOT NULL,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY(userId) REFERENCES [user](userId),
 	PRIMARY KEY(addressId)
 );
