@@ -1,17 +1,19 @@
 CREATE DATABASE WareHouseManagementSystem;
 
-USE WareHouseManagementSystem;
+USE NewWarehouseSystem;
 
+--Create commands for brand table 
 CREATE TABLE Brand
       (
       brandId INT NOT NULL PRIMARY KEY,
       title VARCHAR(20),
       summary TEXT,
-      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      createdAt DATETIME,
+      updatedAt DATETIME,
       about TEXT
       );
 
+--Create commands for supplier table
 CREATE TABLE Supplier
      (
      supplierId INT NOT NULL PRIMARY KEY,
@@ -25,6 +27,7 @@ CREATE TABLE Supplier
      email VARCHAR(50)
      );
 
+--Create commands for category table
 CREATE TABLE Category(
     categoryId INT NOT NULL,
     title VARCHAR(20) NOT NULL,
@@ -34,7 +37,7 @@ CREATE TABLE Category(
     PRIMARY KEY (categoryId)
 );
 
-
+--Create commands for User table
 CREATE TABLE [User](
     userId INT NOT NULL,
     firstName VARCHAR(20) NOT NULL,
@@ -43,11 +46,12 @@ CREATE TABLE [User](
 	username VARCHAR(20),
     email VARCHAR(50),
 	phoneNumber VARCHAR(20) NOT NULL,
-	registeredAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	lastLogin DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	registeredAt DATETIME NOT NULL,
+	lastLogin DATETIME NOT NULL,
     PRIMARY KEY(userID)
 );
 
+--Create commands for Product table
 CREATE TABLE Product(
     productId INT NOT NULL,
     title VARCHAR(50) NOT NULL,
@@ -58,6 +62,7 @@ CREATE TABLE Product(
     PRIMARY KEY(productId)
     );
 
+--Create commands for ProductCategory
 CREATE TABLE ProductCategory(
     categoryId INT NOT NULL,
     productId INT NOT NULL,
@@ -65,6 +70,7 @@ CREATE TABLE ProductCategory(
     FOREIGN KEY(productId) REFERENCES Product (productId),
 );
 
+--Create commands for ProductMeta
 CREATE TABLE ProductMeta(
     metaId INT NOT NULL,
     productId INT NOT NULL,
@@ -74,7 +80,7 @@ CREATE TABLE ProductMeta(
     PRIMARY KEY (metaId)
 );
 
-
+--Create commands for Order table
 CREATE TABLE [Order]
     (
       orderId INT NOT NULL PRIMARY KEY,
@@ -84,15 +90,15 @@ CREATE TABLE [Order]
       [status] VARCHAR(40),
       discount DECIMAL DEFAULT 5,
       tax DECIMAL DEFAULT 3,
-      shippingCost DECIMAL 0.5,
+      shippingCost DECIMAL DEFAULT 0.5,
       total DECIMAL,
       promo DECIMAL,
       grandTotal DECIMAL,
-      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+      createdAt DATETIME,
+      updatedAt DATETIME
       );
 
-
+--Create commands for Transaction table
 CREATE TABLE [Transaction](
 	transactionId INT NOT NULL,
 	userId INT NOT NULL FOREIGN KEY REFERENCES [User](userId),
@@ -102,12 +108,13 @@ CREATE TABLE [Transaction](
 	code INT,
 	mode VARCHAR(20),
 	[status] INT NOT NULL DEFAULT 0,
-	createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updatedAt DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+	createdAt DATETIME NOT NULL,
+    updatedAt DATETIME NULL DEFAULT NULL,
 	content VARCHAR(MAX),
 	PRIMARY KEY(transactionId)
 );
 
+--Create commands for StockItem table
 CREATE TABLE StockItem
     (
       itemId INT NOT NULL PRIMARY KEY,
@@ -123,11 +130,11 @@ CREATE TABLE StockItem
 	  defective CHAR,
 	  createdBy INT,
 	  updatedBy INT,
-	  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-	  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+	  createdAt DATETIME,
+	  updatedAt DATETIME
 	  );
 
-
+--Create commands for OrderItem table
 CREATE TABLE OrderItem
     (
     orderItemId INT NOT NULL PRIMARY KEY,
@@ -136,13 +143,13 @@ CREATE TABLE OrderItem
     price DECIMAL,
     discount DECIMAL,
     quantity INT,
-    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updateAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    createdAt DATETIME,
+    updateAt DATETIME,
     content TEXT,
 	FOREIGN KEY (orderItemId) REFERENCES StockItem(itemId)
 	);
 
-
+--Create commands for Address
 CREATE TABLE[Address](
     addressId INT NOT NULL,
 	userId INT NOT NULL,
@@ -151,12 +158,12 @@ CREATE TABLE[Address](
    [state] VARCHAR(15) NOT NULL,
 	zipCode VARCHAR(20) NOT NULL,
    [country] VARCHAR(15) NOT NULL,
-    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    createdAt DATETIME NOT NULL,
 	FOREIGN KEY(userId) REFERENCES [user](userId),
 	PRIMARY KEY(addressId)
 );
 
-
+--Create commands for Delivery
 create TABLE Delivery(
 	deliveryId INT NOT NULL,
 	orderId INT NOT NULL UNIQUE,
@@ -167,7 +174,226 @@ create TABLE Delivery(
 	PRIMARY KEY(deliveryId)
 );
 
+-- Constraint to make sure item in stock
+ALTER TABLE dbo.OrderItem ADD CONSTRAINT checkStockConstraint
+CHECK (quantity <= dbo.checkStock(orderItemId));
 
+-- Constraint to validate email id for User
+ALTER TABLE [User]
+ADD CONSTRAINT EmailCheck  CHECK(email LIKE '%___@___%.__%');
+
+-- Constraint to prevent duplicate username
+ALTER TABLE [User] 
+ADD CONSTRAINT [IX_UniqueUserName] UNIQUE NONCLUSTERED ([username] ASC);
+
+-- Contraint to validate email id for supplier
+ALTER TABLE [Supplier]
+ADD CONSTRAINT SupplierEmailCheck  CHECK(email LIKE '%___@___%.__%');
+
+--Function to get Order type
+CREATE FUNCTION getOrderType(@orderId INT)
+-- return 1 for customer order and 0 for purchase order
+RETURNS INT
+AS
+   BEGIN
+   DECLARE @orderType as VARCHAR(20)
+   DECLARE @result as INT
+   SELECT @orderType = orderType FROM [order] 
+   WHERE orderId = @orderId
+    IF (@orderType = 'customer order')
+        SET @result = 1
+    ELSE
+        SET @result = 0
+    RETURN @result
+   END
+GO  
+
+--Function to calculate final order price
+CREATE FUNCTION computeOrderTotalPrice
+(@orderId int) 
+RETURNS DECIMAL 
+AS
+   BEGIN 
+      DECLARE @price DECIMAL; 
+      DECLARE @total DECIMAL;
+      DECLARE @discount DECIMAL;
+      SELECT @total = sum(price)
+         FROM OrderItem 
+         WHERE orderId = @orderId;
+    RETURN @total; 
+   END; 
+
+--Function to calculate total price in Orderitem table
+CREATE FUNCTION computeOrderItemPrice 
+(@productId int, @qty int) 
+RETURNS DECIMAL 
+AS 
+   BEGIN 
+      DECLARE @price DECIMAL; 
+      DECLARE @discount DECIMAL;
+      SELECT @price = price , @discount = discount
+         FROM StockItem 
+         WHERE productId = @productId; 
+      RETURN @price * @qty - ((@price * @qty * @discount)/100); 
+   END; 
+
+--Function to check stock availability
+CREATE FUNCTION checkStock
+(@stockItemId int) 
+RETURNS INT 
+AS
+   BEGIN 
+      DECLARE @stockQty INT; 
+      SELECT @stockQty = quantity
+         FROM StockItem 
+         WHERE itemId = @stockItemId;
+    RETURN @stockQty; 
+    END; 
+
+--Function to calculate shipping cost
+CREATE FUNCTION calculateShippingCost(@orderId INT)
+RETURNS DECIMAL
+AS
+   BEGIN
+
+   DECLARE @Price as DECIMAL
+   DECLARE @shippingCost as DECIMAL
+
+   SELECT @Price = total FROM [order] 
+   WHERE orderId = @orderId
+
+   IF @Price BETWEEN 1 AND 50
+		SET @shippingCost = 2.0
+   ELSE IF @shippingCost BETWEEN 50 AND 99
+		SET @shippingCost = 1.5
+   ELSE 
+		SET @shippingCost = 0
+   RETURN @shippingCost
+   END
+GO   
+
+--Function to assign Promo to order 
+CREATE FUNCTION calculatePromo(@orderId INT)
+RETURNS DECIMAL
+AS
+   BEGIN
+
+   DECLARE @Total as DECIMAL
+   DECLARE @Promo as DECIMAL
+
+   SELECT @Total = total FROM [order] 
+   WHERE orderId = @orderId
+
+   IF @Total BETWEEN 1 AND 50
+		SET @Promo = 0
+   ELSE IF @Total BETWEEN 50 AND 99
+		SET @Promo = 5.0
+   ELSE IF @Total BETWEEN 100 AND 250 
+		SET @PROMO = 8.0
+   ELSE IF @Total BETWEEN 250 AND 500 
+		SET @PROMO = 10.0
+   ELSE
+        SET @Promo=15.0
+   RETURN @Promo
+   END
+GO  
+
+--Trigger to update values in orderItem table
+CREATE TRIGGER updateOrderTotal
+ON dbo.[OrderItem]
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    IF UPDATE (quantity) 
+    BEGIN
+        DECLARE @orderID INT;
+        DECLARE @stockItemId INT;
+        DECLARE @stockQty INT;
+        DECLARE @orderOty INT;
+        DECLARE @orderTotal DECIMAL;
+        DECLARE @orderType INT;
+
+        SELECT 
+        @orderID = orderId, @stockItemId = orderItemId, @orderOty=quantity
+        FROM inserted;
+                SELECT @orderTotal = dbo.computeOrderTotalPrice(@orderID);
+                UPDATE [Order] SET total = @orderTotal WHERE orderId = @orderID;
+                SELECT @orderType = dbo.getOrderType(@orderID);
+                IF @orderType =1
+                    SELECT @stockQty = dbo.checkStock(@stockItemId)-@orderOty;
+                ELSE
+                    SELECT @stockQty = dbo.checkStock(@stockItemId)+@orderOty;
+                UPDATE StockItem SET quantity=@stockQty,
+                availability = CASE WHEN @stockQty <= 0 THEN 'n' ELSE 'y' END
+                WHERE itemId=@stockItemId;
+    END
+END
+
+--Trigger to update values in orderItem table
+CREATE TRIGGER computePerOrderItemTotal
+ON dbo.[OrderItem]
+AFTER INSERT, UPDATE
+AS
+BEGIN
+
+    DECLARE @Price DECIMAL;
+    DECLARE @discount DECIMAL;
+	
+    DECLARE @orderItemId INT;
+    DECLARE @productId INT;
+    DECLARE @orderId INT;
+    DECLARE @quantity INT;
+
+    DECLARE cur CURSOR FOR
+        Select orderItemId, productId, orderId, quantity FROM inserted;
+    OPEN cur
+    FETCH NEXT FROM cur INTO @orderItemId, @productId, @orderId, @quantity
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        SELECT @Price=dbo.computeOrderItemPrice(@productId, @quantity);
+        UPDATE [OrderItem] SET price = @Price 
+        WHERE orderId = @orderID AND orderItemId=@orderItemId AND productId=@productId;
+    FETCH NEXT FROM cur INTO @orderItemId, @productId, @orderId, @quantity
+END
+CLOSE cur
+DEALLOCATE cur
+END
+
+--Trigger to update values in Order table
+CREATE TRIGGER CostOrder
+ON dbo.[Order]
+AFTER INSERT, UPDATE
+AS
+BEGIN
+
+    
+    DECLARE @discount DECIMAL;
+    DECLARE @tax DECIMAL;
+    DECLARE @shippingCost DECIMAL;
+	DECLARE @total DECIMAL;
+    DECLARE @promo DECIMAL;
+	DECLARE @grandTotal DECIMAL
+	
+	DECLARE @orderID INT;
+
+    Select 
+	@orderID = orderId,
+	@tax = tax,
+	@total = total,
+    @discount = discount
+	FROM inserted;
+            SELECT @shippingCost = dbo.calculateShippingCost(@orderID);
+            SELECT @promo = dbo.calculatePromo(@orderID);
+            UPDATE [Order] SET shippingCost = @shippingCost,  promo = @promo,  
+            grandTotal = @total - ((@total*@promo)/100) - ((@total*@discount)/100) + ((@tax*@total)/100) + @shippingCost   WHERE orderId = @orderID;
+END
+
+
+
+/*Insertion commands*/
+
+
+--Insert commands for Brand table
 INSERT INTO Brand(brandId, title, summary, createdAt, updatedAt, about) VALUES (1, 'Apple', 'Phones,Personal gadgets', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,'Apple is an american multinational company specialising in personal electronics products');
 INSERT INTO Brand(brandId, title, summary, createdAt, updatedAt, about) VALUES (2, 'Bose', 'Speakers,Earphones,Headsets', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,'Bose is an american multinational company specialising in speakers, headphones,etc.');
 INSERT INTO Brand(brandId, title, summary, createdAt, updatedAt, about) VALUES (3, 'HP', 'Computers,Personal gadgets', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,'HP is an american multinational company specialising in personal computers and related products');
@@ -179,7 +405,7 @@ INSERT INTO Brand(brandId, title, summary, createdAt, updatedAt, about) VALUES (
 INSERT INTO Brand(brandId, title, summary, createdAt, updatedAt, about) VALUES (9, 'GlaxoSmithKline', 'Pharmaceuticals', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,' GlaxoSmithKline is a British pharma giant');
 INSERT INTO Brand(brandId, title, summary, createdAt, updatedAt, about) VALUES (10, 'Michelin', 'Tyres', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,'Michelin is a french company manufacturing tyres');
 
-
+--Insert commands for Supplier table
 INSERT INTO [Supplier] (supplierId, [name], line1, line2, city, [state], zipcode, phone, email)
 VALUES 
 (1, 'Boston Supply Inc', '157 E Cottage', 'Dorchester', 'Boston', 'MA', '02125', '8572301918', 'bostonsupp@bostoninc.com'),
@@ -193,7 +419,7 @@ VALUES
 (9, 'The Supply Corner', '12 Washington Street', 'Broadway', 'New York City', 'NY', '02321', '4046939172', 'supplycorner@cornersupp.com'), 
 (10, 'Smart Office Supply', '12 Burr Street', 'Jamaica Plain', 'Dorchester', 'MA', '02321', '4046939172', 'supplycorner@cornersupp.com');
 
-
+--Insert commands for Category table
 INSERT INTO Category(categoryId, title, metaTitle, slug, content) VALUES (1, 'Mobile Phones', 'Mobile Phones', 'mobile-phones', 'This category deals with mobile phones, accessories and related products');
 INSERT INTO Category(categoryId, title, metaTitle, slug, content) VALUES (2, 'Computers', 'Computers', 'computers', 'This category deals with Computers, accessories and related products');
 INSERT INTO Category(categoryId, title, metaTitle, slug, content) VALUES (3, 'Tablets', 'Tablets', 'tablets', 'This category deals with Tablets, accessories and related products');
@@ -209,6 +435,7 @@ INSERT INTO Category(categoryId, title, metaTitle, slug, content) VALUES (12, 'G
 INSERT INTO Category(categoryId, title, metaTitle, slug, content) VALUES (13, 'Mics & Audio', 'Mics & Audio', 'mics-audio', 'This category deals with Mics & Audio, accessories and related products');
 INSERT INTO Category(categoryId, title, metaTitle, slug, content) VALUES (14, 'Peripherals', 'peripherals', 'peripherals', 'This category deals with Peripherals, accessories and related products');
 
+--Insert commands for User table
 INSERT INTO [User] (userId, firstName, middleName, lastName, username, email, phoneNumber, registeredAt, lastLogin)
 VALUES (1, 'Vicken', '', 'Joseph', 'vicken.joseph', 'vickenjoseph@gmail.com', '8574322233', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (2, 'James', '', 'Smith', 'james.smith', 'james.smith@gmail.com', '8573341233', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -221,7 +448,7 @@ VALUES (1, 'Vicken', '', 'Joseph', 'vicken.joseph', 'vickenjoseph@gmail.com', '8
 (9, 'Margaret', '', 'Brown', 'margaret.brown', 'margaret.brown@gmail.com', '4041969998', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP), 
 (10, 'Eliza', '', 'Johnson', 'elisa.johnson', 'elisa.johnson@gmail.com', '8572348851', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP );
 
-
+--Insert commands for Product table
 INSERT INTO Product(productId, title, summary, content) VALUES (1, 'Iphone 14 Pro', '64 GB, Black, iOS 16', 'This is 64 GB, Black, iOS 16');
 INSERT INTO Product(productId, title, summary, content) VALUES (2, 'Iphone 14 Pro Max', '64 GB, Black, iOS 16', 'This is 64 GB, Black, iOS 16');
 INSERT INTO Product(productId, title, summary, content) VALUES (3, 'Iphone 13 Pro', '64 GB, Black, iOS 16', 'This is 64 GB, Black, iOS 16');
@@ -236,6 +463,7 @@ INSERT INTO Product(productId, title, summary, content) VALUES (11, 'Bose Speake
 INSERT INTO Product(productId, title, summary, content) VALUES (12, 'Chromebook', 'Black 128GB', 'Black, 2.1 channel, Bluetooth 5.0');
 INSERT INTO Product(productId, title, summary, content) VALUES (13, 'HP Keyboard', 'Black, all keys', 'Black, sleek black, Bluetooth 5.0');
 
+--Insert commands for ProductCategory table
 INSERT INTO ProductCategory(categoryId, productId) VALUES (1,1);
 INSERT INTO ProductCategory(categoryId, productId) VALUES (1,2);
 INSERT INTO ProductCategory(categoryId, productId) VALUES (1,3);
@@ -250,6 +478,7 @@ INSERT INTO ProductCategory(categoryId, productId) VALUES (11,11);
 INSERT INTO ProductCategory(categoryId, productId) VALUES (4,12);
 INSERT INTO ProductCategory(categoryId, productId) VALUES (14,13);
 
+--Insert commands for ProductMeta table
 INSERT INTO ProductMeta(metaId, productId, [key], content) VALUES (1, 1, 'banner', 'The best iphone ever');
 INSERT INTO ProductMeta(metaId, productId, [key], content) VALUES (2, 2, 'banner', 'The best iphone ever');
 INSERT INTO ProductMeta(metaId, productId, [key], content) VALUES (3, 3, 'banner', 'The best iphone ever');
@@ -264,20 +493,21 @@ INSERT INTO ProductMeta(metaId, productId, [key], content) VALUES (11, 11, 'bann
 INSERT INTO ProductMeta(metaId, productId, [key], content) VALUES (12, 12, 'banner', 'Slim like a sword');
 INSERT INTO ProductMeta(metaId, productId, [key], content) VALUES (13, 13, 'banner', 'Feel the feather at your fingertips');
 
-INSERT INTO [Order](orderId,userId,supplierId,orderType,[status],price,tax,shippingCost,promo,createdAt,updatedAt)
+--Insert commands for Order table
+INSERT INTO [Order](orderId,userId,supplierId,orderType,[status],tax,shippingCost,promo,createdAt,updatedAt)
 VALUES
-(1,1,1,'purchase order','processed',200.00,21.00,1.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(2,2,2,'purchase order','processed',210.00,21.00,1.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(3,3,3,'purchase order','processed',220.00,11.00,4.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(4,4,4,'purchase order','processed',250.00,71.00,3.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(5,5,5,'customer order','processed',290.00,41.00,2.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(6,6,6,'purchase order','failed',240.00,21.00,5.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(7,7,7,'customer order','processed',270.00,24.00,5.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(8,8,8,'purchase order','processed',295.00,22.00,2.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(9,9,9,'customer order','failer',204.00,26.00,7.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
-(10,10,10,'purchase order','processed',208.00,25.00,2.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP);
+(1,1,1,'purchase order','processed',21.00,1.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(2,2,2,'purchase order','processed',21.00,1.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(3,3,3,'purchase order','processed',11.00,4.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(4,4,4,'purchase order','processed',71.00,3.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(5,5,5,'customer order','processed',41.00,2.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(6,6,6,'purchase order','failed',21.00,5.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(7,7,7,'customer order','processed',24.00,5.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(8,8,8,'purchase order','processed',22.00,2.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(9,9,9,'customer order','failer',26.00,7.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),
+(10,10,10,'purchase order','processed',25.00,2.50,5.00,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP);
 
-
+--Insert commands for StockItem table
 INSERT INTO StockItem(itemId, productId, brandId, supplierId, orderId, sku, discount, price, quantity, [availability], defective, createdBy, updatedBy, createdAt, updatedAt) VALUES
 (1, 1, 1, 1, 1, 'APPIPH14PRO64B', 0, 999.99, 102400, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (2, 2, 1, 1, 2, 'APPIPH14PMX64B', 0, 1199.99, 102400, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -290,6 +520,7 @@ INSERT INTO StockItem(itemId, productId, brandId, supplierId, orderId, sku, disc
 (9, 9, 1, 1, 9, 'BOSMASTRJACK1', 0, 299.99, 123000, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (10, 10, 1, 1, 10, 'BOSMASTRSPKR', 0, 359.99, 780000, 'y', 'n', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+--Insert commands for Transaction table
 INSERT INTO [Transaction](transactionId,userId, orderId, paymentType, code, mode, [status], createdAt, updatedAt, content, charges) VALUES
 (1,1,1,'Credit_Card', 1122, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 1234.00),
 (2,2,2, 'Debit_Card', 1123, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 234.00),
@@ -302,6 +533,7 @@ INSERT INTO [Transaction](transactionId,userId, orderId, paymentType, code, mode
 (9,9,9, 'Debit_Card', 1120, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 34.00),
 (10,10,10, 'Credit_Card', 1121, 'online', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Payment Received', 934.00);
 
+--Insert commands for OrderItem table
 INSERT INTO orderItem(orderItemId,productid,orderId,quantity,createdAt,updateAt,content)
 VALUES
 (1,1,1,40,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'ABC'),
@@ -315,6 +547,7 @@ VALUES
 (9,9,9,48,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'IJK'),
 (10,10,10,49,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'JKL');
 
+--Insert commands for Address table
 INSERT INTO [Address] (addressId, userId, [address], city, [state], zipCode, country, createdAt)
 VALUES
 (1, 1, '151 East Cottage', 'Boston', 'MA', '02125', 'US', CURRENT_TIMESTAMP ),
@@ -328,7 +561,7 @@ VALUES
 (9, 9, '12 Stony Brk', 'Boston', 'MA', '02776', 'US', CURRENT_TIMESTAMP),
 (10, 10, '45 Virginia St', 'Boston', 'MA', '02187', 'US', CURRENT_TIMESTAMP);
 
-
+--Insert commands for Delivery table
 INSERT INTO [Delivery] (deliveryId, orderId, addressId, [status])
 VALUES 
 (1, 1, 1, 1),
@@ -341,3 +574,176 @@ VALUES
 (8, 8, 8, 0),
 (9, 9, 9, 1),
 (10, 10, 10, 1);
+
+--Encryption on User Details
+
+/*
+COMMANDS TO DROP KEYS
+DROP SYMMETRIC KEY user_Key_1;
+DROP CERTIFICATE usercert;
+DROP MASTER KEY;
+*/
+
+--CREATE MASTER KEY
+
+CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Password2022$';
+
+ -- CREATE CERTIFICATE
+CREATE CERTIFICATE usercert WITH SUBJECT = 'User Indentity Details';
+
+
+-- CREATE SYMMETRIC KEY
+CREATE SYMMETRIC KEY user_Key_1
+WITH ALGORITHM = AES_256  -- it can be AES_128,AES_192,DES etc
+ENCRYPTION BY CERTIFICATE usercert;
+
+--Encryption
+ALTER TABLE [User] ADD FirstName_encrypt varbinary(MAX),MiddleName_encrypt varbinary(MAX),LastName_encrypt varbinary(MAX),
+username_encrypt varbinary(MAX),Email_encrypt varbinary(MAX), PhoneNumber_encrypt varbinary(MAX)
+
+OPEN SYMMETRIC KEY user_Key_1 DECRYPTION BY CERTIFICATE usercert;
+
+UPDATE [User]
+        SET FirstName_encrypt = EncryptByKey (Key_GUID('user_Key_1'),CONVERT(varchar(20), firstName)),
+			MiddleName_encrypt = EncryptByKey (Key_GUID('user_Key_1'),CONVERT(varchar(20), middleName)),
+		    LastName_encrypt = EncryptByKey (Key_GUID('user_Key_1'),CONVERT(varchar(20), lastName)),
+			username_encrypt = EncryptByKey (Key_GUID('user_Key_1'),CONVERT(varchar(20), username)),
+			Email_encrypt = EncryptByKey (Key_GUID('user_Key_1'),CONVERT(varchar(50), email)),
+			PhoneNumber_encrypt = EncryptByKey (Key_GUID('user_Key_1'),CONVERT(char(10), phoneNumber))
+        FROM [User];
+GO
+
+-- Close SYMMETRIC KEY
+CLOSE SYMMETRIC KEY user_Key_1;
+GO
+
+--View encrypted data
+SELECT FirstName_encrypt, LastName_encrypt,Email_encrypt , username_encrypt,
+PhoneNumber_encrypt FROM [User];
+
+--Dropping Old Columns 
+--ALTER TABLE [User] DROP COLUMN [firstName],[middleName], [lastName], [username], [email],[phoneNumber];
+
+
+ --- Decryption
+OPEN SYMMETRIC KEY user_Key_1 DECRYPTION BY CERTIFICATE usercert;
+
+SELECT FirstName_encrypt, LastName_encrypt Email_encrypt ,username_encrypt,
+PhoneNumber_encrypt,
+CONVERT(varchar, DecryptByKey(FirstName_encrypt)) AS 'Decrypted Firstname',
+CONVERT(varchar, DecryptByKey(LastName_encrypt)) AS 'Decrypted Lastname',
+CONVERT(varchar, DecryptByKey(Email_encrypt)) AS 'Decrypted Email',
+CONVERT(varchar, DecryptByKey(username_encrypt)) AS 'Decrypted Username',
+CONVERT(varchar, DecryptByKey(PhoneNumber_encrypt)) AS 'Decrypted PhoneNumber'
+FROM [User];
+
+CLOSE SYMMETRIC KEY user_Key_1;
+
+
+-- View to display top 5 products sold in the last ten days
+create view TopFive AS
+SELECT TOP(5) oi.orderItemId, SUM(oi.quantity) AS TotalQuantity
+FROM orderItem oi Inner JOIN [order] o ON oi.orderId = o.orderId
+WHERE oi.createdAt>=DATEADD(DAY,-10,GETDATE())
+GROUP BY oi.orderItemId
+ORDER BY SUM(Quantity) DESC
+
+--select * from TopFive
+--DROP view TopFive
+-- View to display the brand report 
+create view BrandReport as
+select b.brandId, b.title, SUM(oi.quantity) AS qtySold 
+FROM brand b INNER JOIN StockItem si ON b.brandId = si.brandID
+INNER JOIN orderItem oi ON oi.orderItemId = si.itemId
+GROUP BY b.brandId,b.title
+
+--select * from BrandReport
+--DROP view BrandReport
+
+-- View to see what products need to be restocked
+CREATE VIEW Restock as
+select p.productId, p.title, sum(si.quantity) as qty 
+from StockItem si INNER JOIN Product p ON si.productId = p.productId
+GROUP BY p.productId,p.title
+having sum(si.quantity)<200000;
+
+/*select * from Restock*/
+--DROP view Restock
+
+/*Procedure*/
+
+--Procedure to place a customer order
+GO
+CREATE PROCEDURE 
+MakeCustomerOrder(@customerId INT, @productId INT, @quantity INT)
+AS
+BEGIN
+
+    DECLARE @productExists INT;
+    SELECT @productExists = COUNT(productId) FROM Product WHERE productId = @productId;
+    IF @productExists > 0
+        BEGIN
+            DECLARE @stockExists INT;
+            DECLARE @tax DECIMAL;
+            DECLARE @discount DECIMAL;
+            SET @tax = 5;
+            SET @discount = 25; 
+            DECLARE @stockItemId INT
+            SELECT @stockItemId = itemId from StockItem;
+            SELECT @stockExists = dbo.checkStock(@stockItemId);
+            IF @stockExists > @quantity
+                BEGIN
+                    DECLARE @orderId INT
+                    SELECT @orderId = MAX(orderId) FROM [Order]; --- last order id
+                    SET @orderId = @orderId + 1
+                    
+
+                    INSERT INTO [Order](orderId, userId, orderType, discount, tax) VALUES (@orderId, @customerId, 'customer order', @discount, @tax);
+                    INSERT INTO OrderItem(orderItemId, productId, orderId, quantity) VALUES (@stockItemId, @productId, @orderId, @quantity);
+                    PRINT 'Successfully placed your order!'        
+                END
+            ELSE
+                BEGIN
+                    PRINT 'We are out of stock! Try again later!'
+                END
+        END
+    ELSE
+        BEGIN
+            PRINT 'No such product exists'
+        END
+END
+
+--Procedure for placing purchase order
+GO
+CREATE PROCEDURE 
+MakePurchaseOrder(@supplierID INT, @productId INT, @quantity INT)
+AS
+BEGIN
+
+    DECLARE @productExists INT;
+    SELECT @productExists = COUNT(productId) FROM Product WHERE productId = @productId;
+    IF @productExists > 0
+        BEGIN
+            DECLARE @stockExists INT;
+            DECLARE @tax DECIMAL;
+            DECLARE @discount DECIMAL;
+            SET @tax = 5;
+            SET @discount = 25; 
+            DECLARE @stockItemId INT
+            SELECT @stockItemId = itemId from StockItem;
+            SELECT @stockExists = dbo.checkStock(@stockItemId);
+            
+            DECLARE @orderId INT
+            SELECT @orderId = MAX(orderId) FROM [Order]; --- last order id
+            SET @orderId = @orderId + 1
+            
+            INSERT INTO [Order](orderId, supplierId, orderType, discount, tax) VALUES (@orderId, @supplierID, 'purchase order', @discount, @tax);
+            INSERT INTO OrderItem(orderItemId, productId, orderId, quantity) VALUES (@stockItemId, @productId, @orderId, @quantity);
+            PRINT 'Successfully placed your order!'        
+        END
+    ELSE
+        BEGIN
+            PRINT 'No such product exists'
+        END
+END
+
