@@ -641,31 +641,49 @@ CLOSE SYMMETRIC KEY user_Key_1;
 
 
 -- View to display top 5 products sold in the last ten days
-create view TopFive AS
-SELECT TOP(5) oi.orderItemId, SUM(oi.quantity) AS TotalQuantity
-FROM orderItem oi Inner JOIN [order] o ON oi.orderId = o.orderId
-WHERE oi.createdAt>=DATEADD(DAY,-10,GETDATE())
-GROUP BY oi.orderItemId
-ORDER BY SUM(Quantity) DESC
+CREATE VIEW TopFive AS
+    SELECT 
+        TOP(5) oi.orderItemId as 'Order Item ID', 
+        p.title as 'Product Title',
+        SUM(oi.quantity) AS 'Total Quantity Ordered'
+    FROM orderItem oi 
+    JOIN [order] o 
+        ON oi.orderId = o.orderId
+    JOIN Product p
+        ON oi.productId = p.productId
+    WHERE oi.createdAt>=DATEADD(DAY,-10,GETDATE())
+    GROUP BY oi.orderItemId, p.title
+    ORDER BY SUM(Quantity) DESC
 
 --select * from TopFive
 --DROP view TopFive
 -- View to display the brand report 
-create view BrandReport as
-select b.brandId, b.title, SUM(oi.quantity) AS qtySold 
-FROM brand b INNER JOIN StockItem si ON b.brandId = si.brandID
-INNER JOIN orderItem oi ON oi.orderItemId = si.itemId
-GROUP BY b.brandId,b.title
+CREATE VIEW BrandReport AS
+    SELECT 
+        b.brandId as 'Brand ID',
+        b.title as 'Brand Name', 
+        SUM(oi.quantity) AS 'Sold Quantity'
+    FROM Brand b 
+    INNER JOIN 
+        StockItem si ON b.brandId = si.brandID
+    INNER JOIN 
+        orderItem oi ON oi.orderItemId = si.itemId
+    GROUP BY b.brandId,b.title;
 
 --select * from BrandReport
 --DROP view BrandReport
 
--- View to see what products need to be restocked
-CREATE VIEW Restock as
-select p.productId, p.title, sum(si.quantity) as qty 
-from StockItem si INNER JOIN Product p ON si.productId = p.productId
-GROUP BY p.productId,p.title
-having sum(si.quantity)<200000;
+-- View to see what products need to be restocked based on the given threshold
+CREATE VIEW ReStock AS
+    SELECT 
+        p.productId as 'Product ID', 
+        p.title as 'Product Name', 
+        SUM(si.quantity) as 'Available Quantity' 
+    FROM StockItem si 
+    INNER JOIN 
+        Product p ON si.productId = p.productId
+    GROUP BY p.productId,p.title
+    HAVING SUM(si.quantity)<200000;
 
 /*select * from Restock*/
 --DROP view Restock
